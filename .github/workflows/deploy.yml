@@ -11,22 +11,14 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          clean: true
+      - name: Pull latest code
+        run: |
+          git -C /opt/cal.diy remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/sagan-dev/cal.sagan.dev.git
+          git -C /opt/cal.diy fetch origin main
+          git -C /opt/cal.diy reset --hard origin/main
 
       - name: Write .env
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > /opt/cal.diy/.env
-
-      - name: Sync files
-        run: |
-          rsync -a --delete \
-            --exclude='.git' \
-            --exclude='.env' \
-            --exclude='node_modules' \
-            $GITHUB_WORKSPACE/ /opt/cal.diy/
+        run: echo "${{ secrets.ENV_FILE }}" > /opt/cal.diy/.env
 
       - name: Build and restart containers
         working-directory: /opt/cal.diy
